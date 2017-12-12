@@ -11,8 +11,8 @@ namespace ConsoleApp2
     {
         // Это класс лифта и всего, что характеризует его поведение
         // Он представляет собой объект лифт со свойствами, которые задает пользователь
-        
-            
+
+
         private static int targetFloor = 0;//этаж, который вызывают из лифта
         private static bool isOpen = false;//открыты ли двери
         private static bool isOnFloor = false; //прибыл ли лифт 
@@ -35,7 +35,7 @@ namespace ConsoleApp2
         Random rnd1 = new Random();
         Timer timerClose = new Timer(1000);//таймер для открытия закрытия дверей
         Timer timerToGo = new Timer(1000);//таймер, который считает время, которое лифт едет по этажам
-        public int NumberOfFloors
+        public int NumberOfFloors // Число этажей
         {
             get { return N; }
             set
@@ -43,7 +43,7 @@ namespace ConsoleApp2
                 N = Convert.ToInt32(value);
             }
         }
-        public double HeightOfFloor
+        public double HeightOfFloor // Высота этажа
         {
             get { return heightOfFloor; }
             set
@@ -51,7 +51,7 @@ namespace ConsoleApp2
                 heightOfFloor = value;
             }
         }
-        public double SpeedOfElevator
+        public double SpeedOfElevator // Скорость движения лифта
         {
             get { return elevatorSpeed; }
             set
@@ -59,7 +59,7 @@ namespace ConsoleApp2
                 elevatorSpeed = value;
             }
         }
-        public double OpenCloseTime
+        public double OpenCloseTime // Время между открытием и закрытием дверей
         {
             get { return openCloseTime; }
             set
@@ -80,16 +80,12 @@ namespace ConsoleApp2
             {
                 isOpen = true;
 
-                totalClose -= 1000;
+                totalClose -= 1000; // отнимаем от времени 1000 миллисекунд, пока оно не будет равно 0 и двери не закроются
             }
         }
 
 
-        private static void ElevatorRidesTheFloor()
-        {
-
-        }
-       
+        
         /// <summary>
         /// процедура TimerInitialization
         /// Инициализирует методы, которые будут при 
@@ -101,16 +97,16 @@ namespace ConsoleApp2
             timerClose.Elapsed += new ElapsedEventHandler(OnTimerOpenClose); // метод, который считает время до закрытия дверей
         }
 
-       /// <summary>
-       /// Процедура ChangeFloor
-       /// Запускает, а затем останавливает таймер,
-       /// который служит для вычисления высоты лифта 
-       /// при движении. 
-       /// Когда лифт приехал, таймер останавливается.
-       /// </summary>
+        /// <summary>
+        /// Процедура ChangeFloor
+        /// Запускает, а затем останавливает таймер,
+        /// который служит для вычисления высоты лифта 
+        /// при движении. 
+        /// Когда лифт приехал, таймер останавливается.
+        /// </summary>
         private void ChangeFloor()
         {
-           
+
             while ((Callflag == true && Floor != targetFloor))
             {
                 if (isOpen == true && ElapsedOpenClose < totalClose && firstTimeflag == true) //Если вызвали лифт в первый раз
@@ -138,7 +134,7 @@ namespace ConsoleApp2
 
                     Console.WriteLine("Лифт приехал");
                 }
-                
+
                 if (isOpen == false && Answer == "Go") //Если пользователь внутри лифта, ответ Answer равен "Go"
                 {
                     if (timerToGo.Enabled == false)
@@ -209,7 +205,7 @@ namespace ConsoleApp2
             TimerInitialization();
 
 
-            
+
             totalClose = openCloseTime * 1000;
 
             targetFloor = userFloor;
@@ -218,14 +214,14 @@ namespace ConsoleApp2
             {
                 if (firstTimeflag == true) // если в первый раз вызываем лифт, то находимся на первом этаже
                 {
-                    Console.WriteLine("Вы находитесь на первом этаже"); 
+                    Console.WriteLine("Вы находитесь на первом этаже");
                 }
 
-                    Console.WriteLine("Чтобы вызвать лифт, введите слово Call");
-                    Console.WriteLine("Чтобы завершить работу программы, введите Exit");
-                    Call = Console.ReadLine();
-                
-            
+                Console.WriteLine("Чтобы вызвать лифт, введите слово Call");
+                Console.WriteLine("Чтобы завершить работу программы, введите Exit");
+                Call = Console.ReadLine();
+
+
                 if (Call == "Exit") // Если ответ пользователя "Exit", выходим из цикла
                 {
                     break;
@@ -242,22 +238,22 @@ namespace ConsoleApp2
                 {
                     do
                     {
-                       
-                        Callflag = true; 
+
+                        Callflag = true;
                         timerClose.Start(); //Когда лифт приехал, открываем двери и запускаем таймер отсчета времени до закрытия дверей
 
                         if (totalClose > 0)
                         {
 
-                            
+
                             isOpen = true;//Если флаг isOpen=true, двери открылись
                         }
 
 
 
-                        if (isOpen == true && Answer != "Y" && timerClose.Enabled == true) 
+                        if (isOpen == true && Answer != "Y" && timerClose.Enabled == true)
                         {
-                           
+
                             Console.WriteLine("Двери открылись");
                             Console.WriteLine("Войти в лифт?(Y/N)");
                             Answer = Console.ReadLine();
@@ -279,7 +275,7 @@ namespace ConsoleApp2
                 }
                 Answer1 = Answer;
                 totalClose = 1000 * openCloseTime;
-                if (Answer1 == "Y") 
+                if (Answer1 == "Y")
                 {
                     while (Answer != "Go" || Answer != "Quit")
                     {
@@ -301,7 +297,7 @@ namespace ConsoleApp2
                         Answer = Console.ReadLine();
                         if (Answer == "Quit")
                         {
-                            
+
                             do
                             {
                                 Callflag = true;
@@ -329,7 +325,7 @@ namespace ConsoleApp2
                                 if ((Answer == "Quit" && isOpen == true))
                                 {
 
-                                    
+
 
                                     if (totalClose <= 0)
                                     {
@@ -374,7 +370,7 @@ namespace ConsoleApp2
                             Callflag = true;
 
                             ChangeFloor();
-                         
+
                         }
 
                         if (var == "Quit")
