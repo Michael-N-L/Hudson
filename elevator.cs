@@ -9,7 +9,10 @@ namespace ConsoleApp2
 {
     class Elevator
     {
-
+        // Это класс лифта и всего, что характеризует его поведение
+        // Он представляет собой объект лифт со свойствами, которые задает пользователь
+        
+            
         private static int targetFloor = 0;//этаж, который вызывают из лифта
         private static bool isOpen = false;//открыты ли двери
         private static bool isOnFloor = false; //прибыл ли лифт 
@@ -27,7 +30,11 @@ namespace ConsoleApp2
         private static bool Callflag = true;//флаг вызова лифта
         private static bool enterTheElevatorFlag = false; //вошел ли пользователь в лифт
         private static bool flagEscape = false; //флаг выхода false внутри
+        private static bool firstTimeflag = true; //флаг, вызываем ли в первый раз лифт
+        private string Answer = "";//переменная для хранения ответа пользователя
         Random rnd1 = new Random();
+        Timer timerClose = new Timer(1000);//таймер для открытия закрытия дверей
+        Timer timerToGo = new Timer(1000);//таймер, который считает время, которое лифт едет по этажам
         public int NumberOfFloors
         {
             get { return N; }
@@ -60,6 +67,13 @@ namespace ConsoleApp2
                 openCloseTime = value;
             }
         }
+        /// <summary>
+        /// процедура OnTimerOpenClose
+        /// Обрабатывает событие таймера timerClose 
+        /// и отсчитывает время, в течение которого лифт открыт
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
         public static void OnTimerOpenClose(Object source, ElapsedEventArgs e)
         {
             if (totalClose > 0)
@@ -71,9 +85,91 @@ namespace ConsoleApp2
         }
 
 
+        private static void ElevatorRidesTheFloor()
+        {
+
+        }
+       
+        /// <summary>
+        /// процедура TimerInitialization
+        /// Инициализирует методы, которые будут при 
+        /// прохождении заданного интервала времени
+        /// </summary>
+        private void TimerInitialization()
+        {
+            timerToGo.Elapsed += new ElapsedEventHandler(OnTimerToGo);//метод, который считает высоту лифта и этаж
+            timerClose.Elapsed += new ElapsedEventHandler(OnTimerOpenClose); // метод, который считает время до закрытия дверей
+        }
+
+       /// <summary>
+       /// Процедура ChangeFloor
+       /// Запускает, а затем останавливает таймер,
+       /// который служит для вычисления высоты лифта 
+       /// при движении. 
+       /// Когда лифт приехал, таймер останавливается.
+       /// </summary>
+        private void ChangeFloor()
+        {
+           
+            while ((Callflag == true && Floor != targetFloor))
+            {
+                if (isOpen == true && ElapsedOpenClose < totalClose && firstTimeflag == true) //Если вызвали лифт в первый раз
+                {
+                    timerClose.Start();
+
+                    Console.WriteLine("Лифт поехал");
+                    firstTimeflag = false;
+
+                }
+
+                if (isOpen == false && ElapsedOpenClose < totalClose && firstTimeflag == true)
+                {
+                    timerToGo.Start();
+                    Console.WriteLine("Лифт поехал");
+
+                    firstTimeflag = false;
+
+                }
+                if (Floor == targetFloor && Answer != "Go")
+                {
+
+                    isOnFloor = true;
+                    timerToGo.Stop();
+
+                    Console.WriteLine("Лифт приехал");
+                }
+                
+                if (isOpen == false && Answer == "Go") //Если пользователь внутри лифта, ответ Answer равен "Go"
+                {
+                    if (timerToGo.Enabled == false)
+                    {
+                        Console.WriteLine("Лифт поехал");
+                    }
+                    timerToGo.Start();
+
+                }
+                if (Floor == targetFloor && Answer == "Go")
+                {
 
 
+                    isOnFloor = true;
+                    timerToGo.Stop();
 
+                    Console.WriteLine("Лифт приехал");
+
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// процедура OnTimerToGo
+        /// Обрабатывает событие таймера timerToGo
+        /// Увеличивает или уменьшает высоту лифта на заданное значение,
+        /// вычисляет текущий этаж и выводит сообщение о том, какой этаж проезжает лифт
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
         public static void OnTimerToGo(Object source, ElapsedEventArgs e)
         {
 
@@ -82,121 +178,86 @@ namespace ConsoleApp2
             {
                 elevatorHeight -= elevatorSpeed;
                 Floor = Convert.ToInt32(Math.Round(elevatorHeight / heightOfFloor));
-                Console.WriteLine("Лифт движется {0}", Floor);
+                Console.WriteLine("Лифт проезжает {0} этаж", Floor);
             }
             else if (Floor < targetFloor)
             {
                 elevatorHeight += elevatorSpeed;
                 Floor = Convert.ToInt32(Math.Round(elevatorHeight / heightOfFloor));
-                Console.WriteLine("Лифт движется {0}", Floor);
+                Console.WriteLine("Лифт проезжает {0} этаж", Floor);
             }
         }
-
+        /// <summary>
+        /// Метод ElevatorRunning 
+        /// Запускает цикл работы лифта
+        /// </summary>
         public void ElevatorRunning()
         {
 
             Random rnd1 = new Random();
-            
+
 
             Floor = rnd1.Next(1, N + 1); //случайный этаж лифта.
 
             Console.WriteLine("Случайный этаж лифта {0}", Floor);
-            
+
             double startPoint = Floor * heightOfFloor; // высота положения лифта в метрах
             elevatorHeight = startPoint;//высота лифта вначале
-            userHeight = (userFloor - 1) * heightOfFloor;
+            userHeight = (userFloor - 1) * heightOfFloor; //высота, на которой пользователь
 
 
-            Timer timerClose = new Timer(1000);//таймер для открытия закрытия дверей
-            Timer timerToGo = new Timer(1000);//таймер, который считает время, которое лифт едет по этажам
-            timerToGo.Elapsed += new ElapsedEventHandler(OnTimerToGo);
-            //anchor1 timerclose.elapsed
-            timerClose.Elapsed += new ElapsedEventHandler(OnTimerOpenClose);
+            TimerInitialization();
 
 
-            bool firstTimeflag = true; //поменять на false
+            
             totalClose = openCloseTime * 1000;
 
             targetFloor = userFloor;
             string Call = "";
             while (Call != "Quit")
             {
-                if (firstTimeflag == true)
+                if (firstTimeflag == true) // если в первый раз вызываем лифт, то находимся на первом этаже
                 {
-                    Console.WriteLine("Вы находитесь на первом этаже");
+                    Console.WriteLine("Вы находитесь на первом этаже"); 
                 }
-                
 
-                Console.WriteLine("Чтобы вызвать лифт, введите слово Call");
-                Console.WriteLine("Чтобы завершить работу программы, введите Exit");
-                Call = Console.ReadLine();
-                if (Call == "Exit")
+                    Console.WriteLine("Чтобы вызвать лифт, введите слово Call");
+                    Console.WriteLine("Чтобы завершить работу программы, введите Exit");
+                    Call = Console.ReadLine();
+                
+            
+                if (Call == "Exit") // Если ответ пользователя "Exit", выходим из цикла
                 {
                     break;
                 }
-                if (Call == "Call")
+                if (Call == "Call") //Если ответ пользователя "Call", вызываем лифт на этаж
                 {
                     flagEscape = false;
-                    while ((Callflag == true && Floor != targetFloor))
-                    {
-                        if (isOpen == true && ElapsedOpenClose < totalClose && firstTimeflag == true)
-                        {
-                            timerClose.Start();
-
-                            Console.WriteLine("Лифт поехал");
-                            firstTimeflag = false;
-
-                        }
-
-                        if (isOpen == false && ElapsedOpenClose < totalClose && firstTimeflag == true)
-                        {
-                            timerToGo.Start();
-
-                            firstTimeflag = false;
-                            //Console.ReadKey();
-                        }
-                        if (Floor == userFloor)
-                        {
-
-                            isOnFloor = true;
-                            timerToGo.Stop();
-
-                            Console.WriteLine("Лифт приехал");
-
-                        }
-
-
-
-                    }
+                    ChangeFloor();
                 }
-                string Answer = "";
+                Answer = "";
                 //лифт приехал.
                 string Answer1 = "";
-                if (flagEscape == false)
+                if (flagEscape == false) //Если флаг выхода flagEscape = false
                 {
                     do
                     {
-                        if (flagEscape == true)
-                        {
-                            Console.WriteLine("Escape");
-                            break;
-                        }
-
-                        Callflag = true;
-                        timerClose.Start();
+                       
+                        Callflag = true; 
+                        timerClose.Start(); //Когда лифт приехал, открываем двери и запускаем таймер отсчета времени до закрытия дверей
 
                         if (totalClose > 0)
                         {
 
-                            //Console.WriteLine("Двери открылись");
-                            isOpen = true;
+                            
+                            isOpen = true;//Если флаг isOpen=true, двери открылись
                         }
 
 
 
-                        if (isOpen == true && Answer != "Y" && timerClose.Enabled == true)
+                        if (isOpen == true && Answer != "Y" && timerClose.Enabled == true) 
                         {
-                            //                    Console.WriteLine("Войти в лифт?");
+                           
                             Console.WriteLine("Двери открылись");
                             Console.WriteLine("Войти в лифт?(Y/N)");
                             Answer = Console.ReadLine();
@@ -210,7 +271,7 @@ namespace ConsoleApp2
                             isOpen = false;
                             break;
                         }
-        
+
 
 
 
@@ -218,11 +279,11 @@ namespace ConsoleApp2
                 }
                 Answer1 = Answer;
                 totalClose = 1000 * openCloseTime;
-                if (Answer1 == "Y")
+                if (Answer1 == "Y") 
                 {
                     while (Answer != "Go" || Answer != "Quit")
                     {
-                        if (timerClose.Enabled == false)
+                        if (timerClose.Enabled == false) // Если пользователь едет внутри лифта, спрашиваем, хочет ли он выйти, когда лифт остановился
                         {
                             Console.WriteLine("Выйти или выбрать этаж?(Quit/Go)");
                         }
@@ -240,13 +301,13 @@ namespace ConsoleApp2
                         Answer = Console.ReadLine();
                         if (Answer == "Quit")
                         {
-                            //Answer = "";
+                            
                             do
                             {
                                 Callflag = true;
                                 enterTheElevatorFlag = false;
                                 isCalledCarried = false;
-                                totalClose = openCloseTime * 1000;//anchor2
+                                totalClose = openCloseTime * 1000;
                                 timerClose.Start();
                                 Console.WriteLine("Двери открылись");
                                 isOpen = true;
@@ -268,7 +329,7 @@ namespace ConsoleApp2
                                 if ((Answer == "Quit" && isOpen == true))
                                 {
 
-                                    //true вызвали лифт а не поехали в нем false - поехали
+                                    
 
                                     if (totalClose <= 0)
                                     {
@@ -279,7 +340,7 @@ namespace ConsoleApp2
 
                                     Console.WriteLine("Вы на этаже {0}", Floor);
                                     enterTheElevatorFlag = false;
-                                    isCalledCarried = false;//ехали в лифте
+                                    isCalledCarried = false; //Если isCalledCarried = false, значит ехали в лифте, иначе вызвали лифт
 
 
                                     var = "Quit";
@@ -296,50 +357,24 @@ namespace ConsoleApp2
 
                             isCalledCarried = true;
                             int d;
-                            string s="";
+                            string s = "";
                             do
                             {
-                               
-                               
+
+
                                 Console.WriteLine("Введите требуемый этаж");
                                 s = Console.ReadLine();
 
-                                if(Int32.TryParse(s,out d))
+                                if (Int32.TryParse(s, out d))
                                 {
                                     targetFloor = d;
                                 }
-                                
-                            } while (targetFloor < 1 || targetFloor > N||Int32.TryParse(s,out d)==false);
+
+                            } while (targetFloor < 1 || targetFloor > N || Int32.TryParse(s, out d) == false);
                             Callflag = true;
 
-
-                            while (Callflag == true && targetFloor != Floor)
-                            {
-
-
-                                if (isOpen == false && Answer == "Go")
-                                {
-                                    if (timerToGo.Enabled == false)
-                                    {
-                                        Console.WriteLine("Лифт поехал");
-                                    }
-                                    timerToGo.Start();
-
-                                }
-                                if (Floor == targetFloor)
-                                {
-
-
-                                    isOnFloor = true;
-                                    timerToGo.Stop();
-
-                                    Console.WriteLine("Лифт приехал");
-
-                                }
-
-
-
-                            }
+                            ChangeFloor();
+                         
                         }
 
                         if (var == "Quit")
@@ -362,52 +397,52 @@ namespace ConsoleApp2
                 int a;
                 double b;
                 string s = "";
-                while ((t.NumberOfFloors < 5 || t.NumberOfFloors > 20)|| Int32.TryParse(s.ToString(),out a)==false)
-                    {
+                while ((t.NumberOfFloors < 5 || t.NumberOfFloors > 20) || Int32.TryParse(s.ToString(), out a) == false)
+                {
                     Console.WriteLine("введите число этажей N в подъезде (Целое от 5 до 20)");
                     s = Console.ReadLine();
-                    if (Int32.TryParse(s.ToString(), out a) ==true )
+                    if (Int32.TryParse(s.ToString(), out a) == true)
                     {
                         t.NumberOfFloors = Int32.Parse(s);
                     }
-                    }
+                }
                 s = "";
 
-                    while (Double.TryParse(s.ToString(), out b) == false)
-                    {
-                        Console.WriteLine("Введите высоту этажа (м)");
+                while (Double.TryParse(s.ToString(), out b) == false)
+                {
+                    Console.WriteLine("Введите высоту этажа (м)");
                     s = Console.ReadLine();
-                    if(Double.TryParse(s.ToString(),out b))
+                    if (Double.TryParse(s.ToString(), out b))
                     {
                         t.HeightOfFloor = Double.Parse(s);
                     }
-                    
-                    }
+
+                }
                 s = "";
 
-                    while (Double.TryParse(s.ToString(), out b) ==false)
-                    {
-                        Console.WriteLine("Введите скорость движения лифта (м/с)");
+                while (Double.TryParse(s.ToString(), out b) == false)
+                {
+                    Console.WriteLine("Введите скорость движения лифта (м/с)");
                     s = Console.ReadLine();
-                    if(Double.TryParse(s,out b)==true)
+                    if (Double.TryParse(s, out b) == true)
                     {
                         t.SpeedOfElevator = Double.Parse(s);
                     }
-                    }
+                }
 
                 s = "";
-                    while (Double.TryParse(s.ToString(), out b) ==false)
-                    {
-                        Console.WriteLine("Введите время между открытием и закрытием дверей лифта (c)");
+                while (Double.TryParse(s.ToString(), out b) == false)
+                {
+                    Console.WriteLine("Введите время между открытием и закрытием дверей лифта (c)");
                     s = Console.ReadLine();
-                    if(Double.TryParse(s, out b) == true)
+                    if (Double.TryParse(s, out b) == true)
                     {
                         t.OpenCloseTime = Double.Parse(s);
                     }
 
-                    }
+                }
 
-                
+
                 t.ElevatorRunning();
 
             }
